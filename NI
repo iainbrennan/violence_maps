@@ -1,0 +1,37 @@
+# VRU evaluation police.uk data
+
+library(dplyr)
+library(readr)
+library(magrittr)
+library(ggplot2)
+
+# READ ME
+# Download all the data from police.uk/data. For the NI map, just request the 'Police Service of Northern Ireland' data. The code below is based on all available data (Jun17-Jun20), which makes it quite RAM-intensive but saves having to select the 12 specific months. Save the downloaded zip folder wherever you like on your machine and then unzip if. Change the folder name to something simple. For illustration in the code below, I have called the folder 'NI violence' and stored it on my Desktop.
+
+# Assign the unzipped folder as your working directory. For example, if you have saved it to your Desktop and named the folder 'NI', it might be something like this:
+setwd("Desktop/NI violence")
+
+# This will read in all the data from the folders (recursive looks for folders within folders)
+files <- list.files(path = "Desktop/NI violence", pattern = "*.csv", full.names = T, recursive=T)
+
+# Create 'id' which is your ID for force and month. It's a little messy, so the code that follows cleans it up
+ni <- sapply(files, read_csv, simplify=FALSE) %>% 
+  dplyr::bind_rows(.id = "id")
+
+# To filter the data to time frame Jul-19 to Jun-20
+vru1920 <- ni %>%
+  filter(`Crime type` == 'Violence and sexual offences', Month %in% c("2019-07", "2019-08", "2019-09", "2019-10", "2019-11", "2019-12", "2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06"))
+
+ggplot(ni, aes(x = Longitude, y = Latitude)) + 
+  geom_point(size = 0.2, alpha = 0.5) + 
+  xlab('Longitude') + 
+  ylab('Latitude') +  
+  theme(legend.position = "none",
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_blank()) + 
+  ggtitle("Violence and Sexual Offences Northern Irelalnd, Jul19-Jun20")
+
+
